@@ -1,15 +1,14 @@
-using System.IO;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Hadoop.Avro;
 using Microsoft.Hadoop.Avro.Container;
+using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Blob;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Parquet;
 using Parquet.Data;
-using System;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Blob;
+using System.IO;
 
 namespace Avro2ParquetFunction
 {
