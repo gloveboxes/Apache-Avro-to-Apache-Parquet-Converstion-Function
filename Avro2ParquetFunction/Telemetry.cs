@@ -8,8 +8,7 @@ namespace Avro2ParquetFunction
     {
         public int ObjectID { get; set; }
         public string Value { get; set; }
-        public string ClientID { get; set; } = "G1";
+        public string ClientID { get; set; }
         public DateTime TimeStamp { get; set; }
-
     }
 }
