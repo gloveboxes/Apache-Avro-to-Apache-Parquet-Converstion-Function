@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Parquet;
 using Parquet.Data;
+using System.Configuration;
 using System.IO;
 
 namespace Avro2ParquetFunction
@@ -35,11 +36,13 @@ namespace Avro2ParquetFunction
                      ]
         }";
 
-        static string storageAcct = "DefaultEndpointsProtocol=https;AccountName=willowarchive;AccountKey=Qu3V2JOaJJfcOS7XxlMR5GOOk/xo+9VLGX2GGPLd1V5EHJ+3En0cGm4187L5IuWsP0Hl5dBJbHZ+JfFlrUwfhw==;EndpointSuffix=core.windows.net";
         static CloudStorageAccount storageAccount;
 
+        static string storageAcct = ConfigurationManager.AppSettings["StorageAccount"];
+
+
         [FunctionName("Avro2Parquet")]
-        public static void Run([BlobTrigger("telemetry-archive/willowtelemetry01/{name}", Connection = "StorageCS")]Stream myBlob, string name, TraceWriter log)
+        public static void Run([BlobTrigger("telemetry-archive/willowtelemetry01/{name}", Connection = "StorageAccount")]Stream myBlob, string name, TraceWriter log)
         {
             log.Info($"C# Blob trigger function Processed blob\n Name:{name} \n Size: {myBlob.Length} Bytes");
 
