@@ -39,6 +39,8 @@ namespace Avro2ParquetFunction
         static CloudStorageAccount storageAccount;
 
         static string storageAcct = ConfigurationManager.AppSettings["StorageAccount"];
+        static string parquetContainerName = ConfigurationManager.AppSettings["ParquetContainerName"];
+        static string blobName = ConfigurationManager.AppSettings["BlobName"];
 
 
         [FunctionName("Avro2Parquet")]
@@ -75,11 +77,11 @@ namespace Avro2ParquetFunction
             storageAccount = CloudStorageAccount.Parse(storageAcct);
 
             CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
-            CloudBlobContainer blobContainer = blobClient.GetContainerReference("parquet");
+            CloudBlobContainer blobContainer = blobClient.GetContainerReference(parquetContainerName);
 
             blobContainer.CreateIfNotExists();
 
-            CloudBlob blob = blobContainer.GetBlobReference("archive");
+            CloudBlob blob = blobContainer.GetBlobReference(blobName);
             CloudAppendBlob appendBlob = blobContainer.GetAppendBlobReference(name);
 
             using (var ms = new MemoryStream())
