@@ -15,12 +15,7 @@ namespace Avro2ParquetFunction
 {
     public static class Avro2Parquet
     {
-        static DataSet ds = new DataSet(
-              new SchemaElement<int>("ObjectID"),
-              new SchemaElement<string>("Value"),
-              new SchemaElement<string>("ClientID"),
-              new SchemaElement<string>("TimeStamp")
-          );
+
 
         const string Schema = @"{
             ""type"":""record"",
@@ -46,7 +41,17 @@ namespace Avro2ParquetFunction
         [FunctionName("Avro2Parquet")]
         public static void Run([BlobTrigger("telemetry-archive/willowtelemetry01/{name}", Connection = "StorageAccount")]Stream myBlob, string name, TraceWriter log)
         {
-            log.Info($"C# Blob trigger function Processed blob\n Name:{name} \n Size: {myBlob.Length} Bytes");
+            DataSet ds = new DataSet(
+                new SchemaElement<int>("ObjectID"),
+                new SchemaElement<string>("Value"),
+                new SchemaElement<string>("ClientID"),
+                new SchemaElement<string>("TimeStamp")
+            );
+
+            if (myBlob.Length == 508) { return; } // empty dataset
+
+            //log.Info($"C# Blob trigger function Processed blob\n Name:{name} \n Size: {myBlob.Length} Bytes");
+
 
             var serializer = AvroSerializer.CreateGeneric(Schema);
             var jsonSerializer = new JsonSerializer();
@@ -54,6 +59,7 @@ namespace Avro2ParquetFunction
 
             using (var reader = AvroContainer.CreateGenericReader(myBlob))
             {
+
                 using (var streamReader = new SequentialReader<object>(reader))
                 {
                     var results = streamReader.Objects;
@@ -69,8 +75,12 @@ namespace Avro2ParquetFunction
 
                         ds.Add(telemetry.ObjectID, telemetry.Value, telemetry.ClientID, telemetry.TimeStamp.ToString());
                     }
+
                 }
             }
+
+            //log.Info($"{ds.RowCount} Records processed");
+
 
             if (ds.RowCount == 0) { return; }
 
@@ -81,8 +91,18 @@ namespace Avro2ParquetFunction
 
             blobContainer.CreateIfNotExists();
 
+            name = name + ".parquet";
+
             CloudBlob blob = blobContainer.GetBlobReference(blobName);
             CloudAppendBlob appendBlob = blobContainer.GetAppendBlobReference(name);
+
+            if (appendBlob.Exists())
+            {
+                appendBlob.Delete(DeleteSnapshotsOption.IncludeSnapshots);
+            }
+
+            log.Info($"===> {ds.RowCount} Records, {name}");
+
 
             using (var ms = new MemoryStream())
             {
